@@ -3,16 +3,22 @@
     <title>Lightr</title>
 </head>
 <body>
+<script src="/static/js/jscolor.js"></script>
 <h1>Lightr</h1>
-<form method="post" action="/">
+<form method="post" id="light_form" action="/">
 {% for sprite in sprites %}
 	<fieldset>
 		<legend>Colour {{ sprite.name }}</legend>
 		<input type="number" min="-1" max="1" step="0.02" value="{{sprite.dx}}" name="dx_{{ sprite.index }}" />
 		<input type="number" min="-1" max="1" step="0.02" value="{{sprite.dy}}" name="dy_{{ sprite.index }}" />
-		<input type="color" value="{{ sprite.colour }}" name="picker_{{ sprite.index }}" />
+		<input class="jscolor" onchange="update()" value="{{ sprite.colour }}" name="picker_{{ sprite.index }}" />
 	</fieldset>
 {% endfor %}
-	<input name="submit" type="submit" value="submit" />
+	<input name="btnsubmit" type="submit" value="submit" />
 </form>
+<script>
+function update() {
+	document.getElementById('light_form').submit(); 
+}
+</script>
 </body>

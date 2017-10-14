@@ -9,8 +9,8 @@ uh.set_layout(uh.AUTO)
 uh.brightness(1)
 
 sprites = [
-        {"index":0,"name":"one","dx":0.1,"dy":0.2,"colour":"#abcdef"},
-        {"index":1,"name":"two","dx":-0.1,"dy":0.2,"colour":"#fedcba"}]
+        {"index":0,"name":"one","dx":0.3,"dy":0.07,"colour":"#abcdef"},
+        {"index":1,"name":"two","dx":0.2,"dy":0.08,"colour":"#fedcba"}]
 
 w, h = uh.get_shape()
 
@@ -91,7 +91,7 @@ class Check(threading.Thread):
                 try:
                     sprites = eval(body.decode("UTF-8"))
                     print(sprites)
-                    layers = [Layer(sprite["colour"], sprite["dx"], sprite["dy"]) for sprite in sprites]
+                    layers = [Layer("#{}".format(sprite["colour"]), sprite["dx"], sprite["dy"]) for sprite in sprites]
                     self.queue.put(layers)
                 except TypeError as e:
                     print("Got body {}".format(body))
