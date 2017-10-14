@@ -2,8 +2,8 @@ import unicornhat as uh
 from colour import Color
 import pickle
 import pika
-from threading import Timer
-import time
+from queue import Queue, Empty
+import threading
 
 uh.set_layout(uh.AUTO)
 uh.brightness(1)
@@ -39,16 +39,15 @@ except (OSError, IOError) as e:
                     d[(X, Y, i, j)] = max(255.-64.*md, 0)/255.
     pickle.dump(d, open("d.pickle", "wb"))
 
+
 class Layer():
     '''Encapsulates a w by h layer of rgb pixels.
-    Has its own update and draw code (which could move up out?)'''
+    Has its own update and shader code '''
     def __init__(self, c, dx, dy):
         self.x, self. y = 0., 0.
         self.dx, self.dy = float(dx), float(dy)
         self.r, self.g, self.b = (round(x*255) for x in Color(c).rgb)
         self.pixels = [[(0,0,0) for _ in range(w)] for _ in range(h)]
-        self.update()
-
     def update(self):
         # Move point
         self.x = (self.x + self.dx)%w
@@ -60,34 +59,48 @@ class Layer():
         dd =  d[(X, Y, i, j)]
         return (round(self.r*dd), round(self.g*dd), round(self.b*dd))
 
-def check_queue():
-
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-    channel = connection.channel()
-    channel.queue_declare(queue='hello')
-
-    while True:
-        method, header, body = channel.basic_get(queue='hello',no_ack=True)
-        if method and method.NAME != 'Basic.GetEmpty':
+class Display(threading.Thread):
+    def __init__(self, queue, layers):
+        threading.Thread.__init__(self)
+        self.layers = layers
+        self.queue = queue
+    def run(self):
+        while True:
+            # Cycle through the layers fast enough to dither
+            for layer in self.layers:
+                layer.update()
+                uh.shade_pixels(layer.shader)
+                uh.show()
+            # Check if there is are new layers on the queue
             try:
-                sprites = eval(body.decode("UTF-8"))
-                print(sprites)
-                layers = [Layer(sprite["colour"], sprite["dx"], sprite["dy"]) for sprite in sprites]
-            except TypeError as e:
-                print("Got body {}".format(body))
-        time.sleep(1)
+                self.layers = self.queue.get(False)
+            except Empty:
+                pass
+class Check(threading.Thread):
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.queue = queue
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+        self.channel = self.connection.channel()
+        self.channel.queue_declare(queue='hello')
 
-def dither():
-    # Cycle through the layers fast enough to dither
-    for layer in layers:
-        layer.update()
-        uh.shade_pixels(layer.shader)
-#                uh.brightness(1-0.007*i)
-        uh.show()
-        time.sleep(0.005)
+    def run(self):
+        while True:
+            method, header, body = self.channel.basic_get(queue='hello',no_ack=True)
+            if method and method.NAME != 'Basic.GetEmpty':
+                try:
+                    sprites = eval(body.decode("UTF-8"))
+                    print(sprites)
+                    layers = [Layer(sprite["colour"], sprite["dx"], sprite["dy"]) for sprite in sprites]
+                    self.queue.put(layers)
+                except TypeError as e:
+                    print("Got body {}".format(body))
+
 
 if __name__ == '__main__':
     layers = [Layer(sprite["colour"], sprite["dx"], sprite["dy"]) for sprite in sprites]
-    t1 = Timer(1.0, check_queue)
-    while True:
-        dither()
+    q = Queue()
+    display_thread = Display(q, layers)
+    check_thread  = Check(q)
+    display_thread.start()
+    check_thread.start()
