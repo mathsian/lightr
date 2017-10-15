@@ -6,11 +6,11 @@ from queue import Queue, Empty
 import threading
 
 uh.set_layout(uh.AUTO)
-uh.brightness(1)
+uh.brightness(0.6)
 
 sprites = [
-        {"index":0,"name":"one","dx":0.3,"dy":0.07,"colour":"#abcdef"},
-        {"index":1,"name":"two","dx":0.2,"dy":0.08,"colour":"#fedcba"}]
+        {"index":0,"name":"one","dx":0.3,"colour":"#abcdef"},
+        {"index":1,"name":"two","dx":0.2,"colour":"#fedcba"}]
 
 w, h = uh.get_shape()
 
@@ -43,15 +43,14 @@ except (OSError, IOError) as e:
 class Layer():
     '''Encapsulates a w by h layer of rgb pixels.
     Has its own update and shader code '''
-    def __init__(self, c, dx, dy):
+    def __init__(self, c, dx):
         self.x, self. y = 0., 0.
-        self.dx, self.dy = float(dx), float(dy)
+        self.dx = float(dx)
         self.r, self.g, self.b = (round(x*255) for x in Color(c).rgb)
         self.pixels = [[(0,0,0) for _ in range(w)] for _ in range(h)]
     def update(self):
         # Move point
         self.x = (self.x + self.dx)%w
-        self.y = (self.y + self.dy)%h
     def shader(self, i, j):
         # Round off for the distance dictionary
         X = round(self.x,1)
@@ -91,14 +90,14 @@ class Check(threading.Thread):
                 try:
                     sprites = eval(body.decode("UTF-8"))
                     print(sprites)
-                    layers = [Layer("#{}".format(sprite["colour"]), sprite["dx"], sprite["dy"]) for sprite in sprites]
+                    layers = [Layer("#{}".format(sprite["colour"]), sprite["dx"]) for sprite in sprites]
                     self.queue.put(layers)
                 except TypeError as e:
                     print("Got body {}".format(body))
 
 
 if __name__ == '__main__':
-    layers = [Layer(sprite["colour"], sprite["dx"], sprite["dy"]) for sprite in sprites]
+    layers = [Layer(sprite["colour"], sprite["dx"]) for sprite in sprites]
     q = Queue()
     display_thread = Display(q, layers)
     check_thread  = Check(q)

@@ -10,7 +10,6 @@ def index(sprites=None):
         for sprite in session['sprites']:
             sprite["colour"] = request.form['picker_{}'.format(sprite["index"])]
             sprite["dx"] = request.form['dx_{}'.format(sprite["index"])]
-            sprite["dy"] = request.form['dy_{}'.format(sprite["index"])]
         channel.basic_publish(exchange='',
             routing_key='hello',
             body=str(session['sprites']))
@@ -18,8 +17,8 @@ def index(sprites=None):
         sprites = session['sprites']
     except KeyError as e:
         sprites = [
-                {"index":0,"name":"one","dx":0.3,"dy":0.07,"colour":"#abcdef"},
-                {"index":1,"name":"two","dx":0.2,"dy":0.08,"colour":"#fedcba"}]
+                {"index":0,"name":"one","dx":0.3,"colour":"#abcdef"},
+                {"index":1,"name":"two","dx":0.2,"colour":"#fedcba"}]
         session['sprites'] = sprites
     return render_template('index.html', sprites=sprites)
 

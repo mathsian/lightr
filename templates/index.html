@@ -5,17 +5,15 @@
 <body>
 <script src="/static/js/jscolor.js"></script>
 <h1>Lightr</h1>
-<form method="post" id="light_form" action="/">
+	<form method="post" id="light_form" action="/">
 {% for sprite in sprites %}
-	<fieldset>
-		<legend>Colour {{ sprite.name }}</legend>
-		<input type="number" min="-1" max="1" step="0.02" value="{{sprite.dx}}" name="dx_{{ sprite.index }}" />
-		<input type="number" min="-1" max="1" step="0.02" value="{{sprite.dy}}" name="dy_{{ sprite.index }}" />
+		<label for="dx_{{ sprite.index }}">Speed</label>
+		<input type="range" onchange="update()" name="dx_{{ sprite.index }}" min="-1" max="1" step="0.1" value="{{ sprite.dx }}" />
+		<br/>
 		<input class="jscolor" onchange="update()" value="{{ sprite.colour }}" name="picker_{{ sprite.index }}" />
-	</fieldset>
+		<br/>
 {% endfor %}
-	<input name="btnsubmit" type="submit" value="submit" />
-</form>
+	</form>
 <script>
 function update() {
 	document.getElementById('light_form').submit(); 
