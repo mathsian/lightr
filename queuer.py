@@ -17,8 +17,8 @@ def index(sprites=None):
         sprites = session['sprites']
     except KeyError as e:
         sprites = [
-                {"index":0,"name":"one","dx":0.3,"colour":"#abcdef"},
-                {"index":1,"name":"two","dx":0.2,"colour":"#fedcba"}]
+                {"index":0,"name":"one","dx":0.05,"colour":"#abcdef"},
+                {"index":1,"name":"two","dx":0.07,"colour":"#fedcba"}]
         session['sprites'] = sprites
     return render_template('index.html', sprites=sprites)
 

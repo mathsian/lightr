@@ -9,8 +9,8 @@ uh.set_layout(uh.AUTO)
 uh.brightness(0.6)
 
 sprites = [
-        {"index":0,"name":"one","dx":0.3,"colour":"#abcdef"},
-        {"index":1,"name":"two","dx":0.2,"colour":"#fedcba"}]
+        {"index":0,"name":"one","dx":0.05,"colour":"#abcdef"},
+        {"index":1,"name":"two","dx":0.07,"colour":"#fedcba"}]
 
 w, h = uh.get_shape()
 
@@ -51,6 +51,7 @@ class Layer():
     def update(self):
         # Move point
         self.x = (self.x + self.dx)%w
+        self.y = (self.y + 0.01)%h
     def shader(self, i, j):
         # Round off for the distance dictionary
         X = round(self.x,1)
